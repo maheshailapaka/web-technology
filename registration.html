@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="registrationApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Registration Form</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <style>
+        .error { color: red; }
+    </style>
+</head>
+<body ng-controller="RegistrationController">
+    <h2>User Registration</h2>
+    <form name="registrationForm" ng-submit="registerUser()">
+        <label for="name">Name:</label>
+        <input type="text" id="name" ng-model="user.name" required>
+        <span class="error" ng-show="registrationForm.name.$dirty && registrationForm.name.$error.required">Required</span>
+        <br><br>
+
+        <label for="email">Email:</label>
+        <input type="email" id="email" ng-model="user.email" required>
+        <span class="error" ng-show="registrationForm.email.$dirty && registrationForm.email.$error.required">Required</span>
+        <span class="error" ng-show="registrationForm.email.$dirty && registrationForm.email.$error.email">Invalid email</span>
+        <br><br>
+
+        <label for="password">Password:</label>
+        <input type="password" id="password" ng-model="user.password" required minlength="6">
+        <span class="error" ng-show="registrationForm.password.$dirty && registrationForm.password.$error.required">Required</span>
+        <span class="error" ng-show="registrationForm.password.$dirty && registrationForm.password.$error.minlength">Minimum 6 characters</span>
+        <br><br>
+
+        <label for="confirmPassword">Confirm Password:</label>
+        <input type="password" id="confirmPassword" ng-model="user.confirmPassword" required>
+        <span class="error" ng-show="user.password !== user.confirmPassword">Passwords do not match</span>
+        <br><br>
+
+        <button type="submit" ng-disabled="registrationForm.$invalid || user.password !== user.confirmPassword">Register</button>
+    </form>
+
+    <h3>Registered User Details:</h3>
+    <div ng-if="submitted">
+        <p><strong>Name:</strong> {{ user.name }}</p>
+        <p><strong>Email:</strong> {{ user.email }}</p>
+    </div>
+
+    <script>
+        angular.module('registrationApp', [])
+            .controller('RegistrationController', function($scope) {
+                $scope.user = {};
+                $scope.submitted = false;
+                $scope.registerUser = function() {
+                    if ($scope.registrationForm.$valid && $scope.user.password === $scope.user.confirmPassword) {
+                        $scope.submitted = true;
+                    }
+                };
+            });
+    </script>
+</body>
+</html>
