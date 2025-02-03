@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="weatherApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather Dashboard</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #e3f2fd; /* Fallback color */
+            background-image: url('https://wallpaperaccess.com/full/1540010.jpg');
+            background-size: cover; /* Cover the entire body */
+            background-position: center; /* Center the image */
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+            margin: 0;
+        }
+
+        h1 {
+            color: #1976d2;
+            margin-bottom: 20px;
+        }
+
+        .search-bar {
+            display: flex;
+            margin-bottom: 20px;
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 10px;
+        }
+
+        input[type="text"] {
+            padding: 10px;
+            margin-right: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            width: 200px; /* Fixed width for consistency */
+        }
+
+        button {
+            padding: 10px 15px;
+            background-color: #1976d2;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #1565c0; /* Darker shade on hover */
+        }
+
+        .weather-info {
+            background-color: #ffffff;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+            text-align: center; /* Center text in the weather info */
+        }
+
+        .error {
+            color: red;
+            font-weight: bold;
+        }
+
+        h3 {
+            color: #1976d2; /* Color for favorite cities section */
+        }
+
+        ul {
+            list-style-type: none;
+            padding-left: 0;
+        }
+
+        li {
+            margin: 5px 0;
+            padding: 10px;
+            background-color: #ffffff; /* White background for list items */
+            border-radius: 4px; /* Rounded corners */
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            display: flex; /* Flexbox for better layout */
+            justify-content: space-between; /* Space between item and button */
+        }
+
+        li button {
+            background-color: #ff9800; /* Orange color for view weather button */
+        }
+
+        li button:hover {
+            background-color: #fb8c00; /* Darker orange on hover */
+        }
+    </style>
+</head>
+<body ng-controller="WeatherController">
+
+    <h1>Weather Dashboard</h1>
+    
+    <div class="search-bar">
+        <input type="text" ng-model="city" placeholder="Enter city name" />
+        <button ng-click="getWeather()">Get Weather</button>
+    </div>
+
+    <div class="weather-info" ng-if="weatherData">
+        <h2>Weather in {{weatherData.name}}</h2>
+        <p>Temperature: {{weatherData.main.temp}} °C</p>
+        <p>Humidity: {{weatherData.main.humidity}} %</p>
+        <p>Conditions: {{weatherData.weather[0].description}}</p>
+    </div>
+
+    <div class="error" ng-if="error">{{error}}</div>
+
+    <h3>Favorite Cities</h3>
+    <input type="text" ng-model="favoriteCity" placeholder="Add favorite city" />
+    <button ng-click="addToFavorites()">Add to Favorites</button>
+
+    <ul>
+        <li ng-repeat="fav in favorites">
+          {{fav}} 
+          <button ng-click="getWeather(fav)">View Weather</button>
+        </li>
+    </ul>
+
+    <script>
+        var app = angular.module('weatherApp', []);
+        app.controller('WeatherController', function($scope, $http) {
+            $scope.favorites = [];
+
+            $scope.getWeather = function(city) {
+    city = city || $scope.city; // Use the passed city if available
+    const apiKey = 'YOUR_API_KEY'; // Replace with your OpenWeatherMap API key
+    const url = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=metric`; // Corrected this line
+
+    $http.get(url).then(function(response) {
+        $scope.weatherData = response.data;
+        $scope.error = null;
+    }, function(error) {
+        $scope.error = "City not found or API call failed.";
+        $scope.weatherData = null;
+    });
+};
+
+
+            $scope.addToFavorites = function() {
+                if ($scope.favoriteCity && !$scope.favorites.includes($scope.favoriteCity)) {
+                    $scope.favorites.push($scope.favoriteCity);
+                    $scope.favoriteCity = ''; // Clear input after adding
+                }
+            };
+        });
+    </script>
+
+</body>
+</html>
