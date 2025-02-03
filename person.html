@@ -1,0 +1,148 @@
+<html lang="en" ng-app="financeApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Finance App</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular-route.min.js"></script>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.3/css/all.min.css"></link>
+    <script>
+        var app = angular.module('financeApp', ['ngRoute']);
+
+        app.config(function($routeProvider) {
+            $routeProvider
+                .when('/dashboard', {
+                    templateUrl: 'dashboard.html',
+                    controller: 'DashboardController'
+                })
+                .when('/expenses', {
+                    templateUrl: 'expenses.html',
+                    controller: 'ExpensesController'
+                })
+                .when('/income', {
+                    templateUrl: 'income.html',
+                    controller: 'IncomeController'
+                })
+                .otherwise({
+                    redirectTo: '/dashboard'
+                });
+        });
+
+        app.controller('DashboardController', function($scope) {
+            $scope.income = 5000;
+            $scope.expenses = 2000;
+        });
+
+        app.controller('ExpensesController', function($scope) {
+            $scope.expenses = [
+                { id: 1, description: 'Groceries', amount: 100 },
+                { id: 2, description: 'Rent', amount: 800 },
+                { id: 3, description: 'Utilities', amount: 150 }
+            ];
+
+            $scope.addExpense = function() {
+                $scope.expenses.push({
+                    id: $scope.expenses.length + 1,
+                    description: $scope.newExpenseDescription,
+                    amount: $scope.newExpenseAmount
+                });
+                $scope.newExpenseDescription = '';
+                $scope.newExpenseAmount = '';
+            };
+        });
+
+        app.controller('IncomeController', function($scope) {
+            $scope.incomeRecords = [
+                { id: 1, description: 'Salary', amount: 3000 },
+                { id: 2, description: 'Freelance', amount: 2000 }
+            ];
+
+            $scope.addIncome = function() {
+                $scope.incomeRecords.push({
+                    id: $scope.incomeRecords.length + 1,
+                    description: $scope.newIncomeDescription,
+                    amount: $scope.newIncomeAmount
+                });
+                $scope.newIncomeDescription = '';
+                $scope.newIncomeAmount = '';
+            };
+        });
+    </script>
+</head>
+<body class="bg-gray-100">
+    <div class="container mx-auto p-4">
+        <nav class="bg-white p-4 rounded shadow mb-4">
+            <ul class="flex space-x-4">
+                <li><a href="#/dashboard" class="text-blue-500 hover:underline">Dashboard</a></li>
+                <li><a href="#/expenses" class="text-blue-500 hover:underline">Expenses</a></li>
+                <li><a href="#/income" class="text-blue-500 hover:underline">Income</a></li>
+            </ul>
+        </nav>
+        <div ng-view></div>
+    </div>
+
+    <!-- Dashboard Template -->
+    <script type="text/ng-template" id="dashboard.html">
+        <div class="bg-white p-4 rounded shadow">
+            <h1 class="text-2xl font-bold mb-4">Dashboard</h1>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="bg-green-100 p-4 rounded">
+                    <h2 class="text-xl font-semibold">Total Income</h2>
+                    <p class="text-3xl">${{ income }}</p>
+                </div>
+                <div class="bg-red-100 p-4 rounded">
+                    <h2 class="text-xl font-semibold">Total Expenses</h2>
+                    <p class="text-3xl">${{ expenses }}</p>
+                </div>
+            </div>
+        </div>
+    </script>
+
+    <!-- Expenses Template -->
+    <script type="text/ng-template" id="expenses.html">
+        <div class="bg-white p-4 rounded shadow">
+            <h1 class="text-2xl font-bold mb-4">Expenses</h1>
+            <form ng-submit="addExpense()" class="mb-4">
+                <div class="mb-2">
+                    <label class="block text-sm font-medium text-gray-700">Description</label>
+                    <input type="text" ng-model="newExpenseDescription" class="mt-1 block w-full p-2 border border-gray-300 rounded" required>
+                </div>
+                <div class="mb-2">
+                    <label class="block text-sm font-medium text-gray-700">Amount</label>
+                    <input type="number" ng-model="newExpenseAmount" class="mt-1 block w-full p-2 border border-gray-300 rounded" required>
+                </div>
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Add Expense</button>
+            </form>
+            <ul>
+                <li ng-repeat="expense in expenses" class="mb-2 p-2 border-b border-gray-200">
+                    <span class="font-semibold">{{ expense.description }}</span>: ${{ expense.amount }}
+                </li>
+            </ul>
+        </div>
+    </script>
+
+    <!-- Income Template -->
+    <script type="text/ng-template" id="income.html">
+        <div class="bg-white p-4 rounded shadow">
+            <h1 class="text-2xl font-bold mb-4">Income</h1>
+            <form ng-submit="addIncome()" class="mb-4">
+                <div class="mb-2">
+                    <label class="block text-sm font-medium text-gray-700">Description</label>
+                    <input type="text" ng-model="newIncomeDescription" class="mt-1 block w-full p-2 border border-gray-300 rounded" required>
+                </div>
+                <div class="mb-2">
+                    <label class="block text-sm font-medium text-gray-700">Amount</label>
+                    <input type="number" ng-model="newIncomeAmount" class="mt-1 block w-full p-2 border border-gray-300 rounded" required>
+                </div>
+                <button type="submit" class="bg-blue-500 text-white px-4 py-2 rounded">Add Income</button>
+            </form>
+            <ul>
+                <li ng-repeat="income in incomeRecords" class="mb-2 p-2 border-b border-gray-200">
+                    <span class="font-semibold">{{ income.description }}</span>: ${{ income.amount }}
+                </li>
+            </ul>
+        </div>
+    </script>
+</body>
+</html>
