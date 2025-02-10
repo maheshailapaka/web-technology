@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en" ng-app="financeApp">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=10.0">
+    <title>Finance Tracker</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.8.2/angular.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/angular-route/1.8.2/angular-route.min.js"></script>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            color: white;
+            text-align: center;
+            margin: 0;
+            padding: 0;
+        }
+
+        .navbar {
+            display: flex;
+            justify-content: space-around;
+            background: rgba(0, 0, 0, 0.7);
+            padding: 15px;
+        }
+
+        .navbar a {
+            color: white;
+            text-decoration:none;
+            font-size: 18px;
+            padding: 10px;
+        }
+
+        .navbar a:hover {
+            background-color: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+        }
+
+        .container {
+            padding: 5px;
+        }
+
+        /* Updated Dashboard Style */
+        .dashboard {
+            margin-top: 1px;
+            background-image: url('https://www.shutterstock.com/shutterstock/photos/304800380/display_1500/stock-vector-money-badge-and-logo-design-quote-text-304800380.jpg');
+            
+            background-position: center;
+            padding: 120px;
+            border-radius: 10px;
+            box-shadow: 0 16px 30px rgba(0, 0, 0, 0.3);
+            color: white;
+        }
+
+        .summary {
+            font-size: 20px;
+            margin: 15px 0;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.5);
+            border-radius: 10px;
+        }
+
+        .finance-info {
+            font-size: 22px;
+            line-height: 1.8;
+        }
+
+        .finance-info span {
+            font-weight: bold;
+            color: #f8b400;
+        }
+
+        .amount {
+            font-size: 18px;
+            color: #f8b400;
+            font-weight: bold;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            margin-top: 20px;
+            text-align: center;
+        }
+
+        .progress-container p {
+            font-size: 18px;
+            margin-bottom: 5px;
+        }
+
+        .progress-bar {
+            width: 80%;
+            height: 20px;
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+            margin: auto;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: #f8b400;
+            border-radius: 10px;
+            transition: width 0.5s ease-in-out;
+        }
+
+        input, button, select {
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px;
+            border-radius: 5px;
+            outline: none;
+        }
+
+        button {
+            background-color: #f8b400;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #f58f00;
+        }
+
+        .input-field {
+            width: 150%;
+            padding: 12px;
+            margin: 10px;
+            border-radius: 5px;
+            font-size: 16px;
+        }
+
+        .savings {
+            color: #27ae60;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body ng-controller="FinanceController">
+
+    <!-- Navigation Menu -->
+    <div class="navbar">
+        <a href="#!/">Dashboard</a>
+        <a href="#!/income">Income</a>
+        <a href="#!/expenses">Expenses</a>
+    </div>
+
+    <!-- This is where different pages will be loaded -->
+    <div class="container">
+        <ng-view></ng-view>
+    </div>
+
+    <!-- Dashboard Page -->
+    <script type="text/ng-template" id="dashboard.html">
+        <h1>Finance Tracker</h1>
+
+        <div class="dashboard">
+            <div class="summary">
+                <h2>Total Income: <span class="amount">{{ formatCurrency(totalIncome) }}</span></h2>
+                <h2>Total Expenses: <span class="amount">{{ formatCurrency(totalExpenses) }}</span></h2>
+                <h2>Monthly Savings: <span class="savings">{{ formatCurrency(totalIncome - totalExpenses) }}</span></h2>
+            </div>
+
+            <!-- Savings Progress Bar -->
+            <div class="progress-container">
+                <p>Savings Progress</p>
+                <div class="progress-bar">
+                    <div class="progress-fill" ng-style="{'width': savingsPercentage() + '%'}"></div>
+                </div>
+                <p>{{ savingsPercentage() }}% of income saved</p>
+            </div>
+        </div>
+    </script>
+
+    <!-- Income Page -->
+    <script type="text/ng-template" id="income.html">
+        <h1>Set Your Income</h1>
+        <input class="input-field" type="number" ng-model="incomeAmount" placeholder="Enter income">
+ 
+        <!-- Currency Selector in Income Page -->
+        <label for="currency">Select Currency:</label>
+        <select id="currency" ng-model="selectedCurrency" ng-change="updateCurrency()">
+            <option value="USD">$ - USD</option>
+            <option value="INR">₹ - INR</option>
+            <option value="EUR">€ - EUR</option>
+        </select>
+
+        <button ng-click="setIncome()">Set Income</button>
+    </script>
+
+    <!-- Expenses Page -->
+    <script type="text/ng-template" id="expenses.html">
+        <h1>Manage Expenses</h1>
+
+        <input class="input-field" type="number" ng-model="expenseAmount" placeholder="Enter expense">
+        <select class="input-field" ng-model="expenseCategory">
+            <option value="Food">Food</option>
+            <option value="Entertainment">Entertainment</option>
+            <option value="Utilities">Utilities</option>
+            <option value="Others">Others</option>
+        </select>
+
+        <button ng-click="addExpense()">Add Expense</button>
+
+        <h3>Total Expenses: {{ formatCurrency(totalExpenses) }}</h3>
+
+        <div class="summary">
+            <h2>Saving: <span class="savings">{{ formatCurrency(totalIncome - totalExpenses) }}</span></h2>
+        </div>
+
+        <ul>
+            <li ng-repeat="expense in expenses">
+                {{ formatCurrency(expense.amount) }} - {{ expense.category }}
+                <button ng-click="removeExpense($index)">Remove</button>
+            </li>
+        </ul>
+    </script>
+
+    <script>
+        var app = angular.module('financeApp', ['ngRoute']);
+
+        app.config(function($routeProvider) {
+            $routeProvider
+                .when("/", {
+                    templateUrl: "dashboard.html",
+                    controller: "DashboardController"
+                })
+                .when("/income", {
+                    templateUrl: "income.html",
+                    controller: "IncomeController"
+                })
+                .when("/expenses", {
+                    templateUrl: "expenses.html",
+                    controller: "ExpensesController"
+                })
+                .otherwise({
+                    redirectTo: "/"
+                });
+        });
+
+        app.controller('FinanceController', function($scope, $location) {
+            $scope.totalIncome = 0;
+            $scope.totalExpenses = 0;
+            $scope.expenses = [];
+            $scope.selectedCurrency = 'USD';
+
+            $scope.currencySymbols = {
+                'USD': '$',
+                'INR': '₹',
+                'EUR': '€'
+            };
+
+            $scope.formatCurrency = function(amount) {
+                return $scope.currencySymbols[$scope.selectedCurrency] + amount.toFixed(2);
+            };
+
+            $scope.updateCurrency = function() {
+                // Currency update logic here
+            };
+
+            $scope.savingsPercentage = function() {
+                return ($scope.totalIncome > 0) ? ((($scope.totalIncome - $scope.totalExpenses) / $scope.totalIncome) * 100) : 0;
+            };
+        });
+
+        app.controller('DashboardController', function($scope) {
+            // No currency selector in the dashboard
+        });
+
+        app.controller('IncomeController', function($scope, $location) {
+            $scope.setIncome = function() {
+                if ($scope.incomeAmount) {
+                    $scope.$parent.totalIncome = parseFloat($scope.incomeAmount);
+                    $scope.$parent.selectedCurrency = $scope.selectedCurrency; // Set selected currency for dashboard
+                    $scope.incomeAmount = '';
+                    $location.path('/expenses');
+                }
+            };
+        });
+
+        app.controller('ExpensesController', function($scope) {
+            $scope.addExpense = function() {
+                if ($scope.expenseAmount) {
+                    $scope.$parent.expenses.push({
+                        amount: parseFloat($scope.expenseAmount),
+                        category: $scope.expenseCategory
+                    });
+                    $scope.$parent.totalExpenses += parseFloat($scope.expenseAmount);
+                    $scope.expenseAmount = '';
+                }
+            };
+
+            $scope.removeExpense = function(index) {
+                $scope.$parent.totalExpenses -= $scope.$parent.expenses[index].amount;
+                $scope.$parent.expenses.splice(index, 1);
+            };
+        });
+    </script>
+
+</body>
+</html>
